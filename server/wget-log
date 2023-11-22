@@ -1,0 +1,15 @@
+--2023-10-31 14:14:55--  https://raw.githubusercontent.com/milvus-io/pymilvus/master/examples/hello_milvus.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 2606:50c0:8001::154, 2606:50c0:8003::154, 2606:50c0:8000::154, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|2606:50c0:8001::154|:443... failed: Connection timed out.
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|2606:50c0:8003::154|:443... failed: Connection timed out.
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|2606:50c0:8000::154|:443... failed: Connection timed out.
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|2606:50c0:8002::154|:443... failed: Connection timed out.
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.111.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 7381 (7.2K) [text/plain]
+Saving to: ‘hello_milvus.py’
+
+     0K .......                                               100% 58.8M=0s
+
+2023-10-31 14:23:54 (58.8 MB/s) - ‘hello_milvus.py’ saved [7381/7381]
+
