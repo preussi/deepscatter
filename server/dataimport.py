@@ -14,7 +14,7 @@ MILVUS_PORT = "19530"
 
 index_params = {
   "metric_type":"COSINE",
-  "index_type":"IVF_SQ8",
+  "index_type":"FLAT",
   "params":{"nlist":1536}
 }
 
@@ -30,7 +30,7 @@ fields = [
     #FieldSchema(name='track_name_spotify', dtype=DataType.VARCHAR, max_length=1000),
     #FieldSchema(name='video_duration_youtube_sec', dtype=DataType.FLOAT),
     #FieldSchema(name='preview_url_spotify', dtype=DataType.VARCHAR, max_length=1000),
-    #FieldSchema(name='video_view_count_youtube', dtype=DataType.FLOAT),
+    #FieldSchema(name='video_view_count_youtube', dtype=DataType.FLOAT, max_length=1000),
     #FieldSchema(name='video_thumbnail_url_youtube', dtype=DataType.VARCHAR, max_length=1000),
     #FieldSchema(name='search_query_youtube', dtype=DataType.VARCHAR, max_length=1000),
     #FieldSchema(name='video_description_youtube', dtype=DataType.VARCHAR, max_length=1000),
@@ -47,36 +47,21 @@ fields = [
     FieldSchema(name='audio_embedding_spotify', dtype=DataType.FLOAT_VECTOR, dim=DIMENSION),  
 ]
 
-schema = CollectionSchema(fields=fields)
+schema = CollectionSchema(fields=fields, enable_dynamic_field=True)
 collection = Collection(name=COLLECTION_NAME, schema=schema)
 collection.create_index(field_name="audio_embedding_spotify", index_params=index_params)
 collection.load()
 
-#collection = Collection("DISCO") 
-
-dset = load_dataset(DATASET, split='train', )
-#dset.set_format(columns=['video_url_youtube', 'track_id_spotify', 'audio_embedding_spotify'])
-#df = pd.DataFrame(dset)
-print("TEST")
-#df = df[['video_url_youtube', 'track_id_spotify', 'audio_embedding_spotify']]
+dset = load_dataset(DATASET, split='train')
 
 def insert_function(batch):
     insertable = [
         batch['video_url_youtube'],
+        #batch['video_view_count_youtube'],
         batch['track_id_spotify'],
         batch['audio_embedding_spotify']
     ]    
     collection.insert(insertable)
 
-dset.map(insert_function, batched=True, batch_size=2048)
+dset.map(insert_function, batched=True, batch_size=1536)
 collection.flush()
-
-
-#i = 0
-#while ((20000*i+20000)<len(df.index)):
-#    collection.insert(df[20000*i:(20000*i+20000)])
-#    collection.flush()
-#    i = i + 1
-#collection.insert(df[20000*i:(len(df.index))])
-#collection.flush()
-
