@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+
 body {
   color: rgb(var(--foreground-rgb));
   background: white;
+  margin: 10;
+  padding: 20;
 }
+

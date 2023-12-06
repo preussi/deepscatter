@@ -1,15 +1,15 @@
+import os
 from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pymilvus import connections, db, utility
-from pymilvus import Collection, FieldSchema, DataType
-import numpy as np
-import librosa
-import torch
+from pymilvus import connections
+from pymilvus import Collection
+import json
 import laion_clap 
-import time
 
 app = FastAPI()
+
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,7 +41,6 @@ collection.load()
 model = laion_clap.CLAP_Module(enable_fusion=False, amodel= 'HTSAT-base')
 model.load_ckpt('music_speech_audioset_epoch_15_esc_89.98.pt') # download the default pretrained checkpoint.
 
-
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -53,11 +52,25 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.get("/search")
 def search(query):
     x = que(query)
-    print("ANAN", x)
     return x
 
+@app.get("/graph-data")
+def get_graph_data():
+    # Define the path to your JSON file
+    json_file_path = os.path.join('graph_data0.json')
+
+    # Check if the file exists
+
+    # Read the JSON file
+    with open(json_file_path, 'r') as file:
+        graph_data = json.load(file)
+
+    # Return the JSON data as a response
+    return graph_data
+
+
 def que (query: str):
-    text_data = [query, "ROCK"] 
+    text_data = [query, ""] 
     text_embed = model.get_text_embedding(text_data)
     results = collection.search(
         data=[text_embed[0]],
@@ -69,8 +82,8 @@ def que (query: str):
         expr=None,
         # set the names of the fields you want to 
         # retrieve from the search result.
-        output_fields=['video_url_youtube'],
+        output_fields=['video_url_youtube', 'preview_url_spotify'],
         consistency_level="Strong"
     )
 
-    return [hit.entity.get('video_url_youtube') for hits in results for hit in hits]
+    return [(hit.entity.get('video_url_youtube'), hit.entity.get('preview_url_spotify')) for hits in results for hit in hits]
