@@ -6,17 +6,17 @@ import numpy as np
 import json
 
 
-login(token="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")
+login(token="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")
 DATASET = 'DISCOX/DISCO-200K-high-quality'
 
 dset = load_dataset(DATASET, split='train')
 df = dset.to_pandas()
 
-df = df['audio_embedding_spotify']
+df_embed = df['audio_embedding_spotify']
 
 array = np.zeros((200000, 512))
-for i in range (0, df.size):
-    array[i] = df[i]
+for i in range (0, df_embed.size):
+    array[i] = df_embed[i]
 
 
 
@@ -33,14 +33,19 @@ pca_result = pca.fit_transform(array)  # Replace `array` with `scaled_array` if 
 
 # Create a DataFrame with PCA results
 pca_df = pd.DataFrame(data=pca_result, columns=['PC1', 'PC2'])
-pca_df = pca_df.multiply(700)
+pca_df = pca_df.multiply(800)
 
 
 # Add identifiers to your DataFrame
-pca_df['id'] = range(1, len(pca_df) + 1)  # Creates unique identifiers starting from 1
+
+pca_df['id'] = range(0, len(pca_df))  # Creates unique identifiers starting from 1
+pca_df['name'] = df['track_name_spotify']
+print(df['track_name_spotify'].head())
+print(pca_df.head())
+
 
 # Create nodes list
-nodes = pca_df.apply(lambda row: {"x": row['PC1'], "y": row['PC2']}, axis=1).tolist()
+nodes = pca_df.apply(lambda row: {"id": row['id'], "x": row['PC1'], "y": row['PC2']}, axis=1).tolist()
 
 # Optionally, create links list. Here, we'll create dummy links for illustration purposes:
 # If you have actual relationships, you should use those instead
