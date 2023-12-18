@@ -10,6 +10,15 @@ services:
     volumes:
       - ./frontend:/frontend
     command: npm run dev
+  deepscatter:
+    container_name: deepscatter
+    build: 
+      context: ./deepscatter
+    ports: 
+      - "3344:3344"
+    volumes:
+      - ./deepscatter:/deepscatter
+    command: npm run dev
   server:
     container_name: server
     build: 

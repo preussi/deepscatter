@@ -32,16 +32,13 @@ pca = PCA(n_components=2)
 pca_result = pca.fit_transform(array)  # Replace `array` with `scaled_array` if necessary
 
 # Create a DataFrame with PCA results
-pca_df = pd.DataFrame(data=pca_result, columns=['PC1', 'PC2'])
-pca_df = pca_df.multiply(800)
+pca_df = pd.DataFrame(data=pca_result, columns=['x', 'y'])
 
 
 # Add identifiers to your DataFrame
 
 pca_df['id'] = range(0, len(pca_df))  # Creates unique identifiers starting from 1
 pca_df['name'] = df['track_name_spotify']
-print(df['track_name_spotify'].head())
-print(pca_df.head())
 
 pca_df.to_csv('pca_results.csv', columns=['x', 'y', 'id', 'name'], index=False)
 
