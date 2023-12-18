@@ -43,22 +43,6 @@ pca_df['name'] = df['track_name_spotify']
 print(df['track_name_spotify'].head())
 print(pca_df.head())
 
-
-# Create nodes list
-nodes = pca_df.apply(lambda row: {"id": row['id'], "x": row['PC1'], "y": row['PC2']}, axis=1).tolist()
-
-# Optionally, create links list. Here, we'll create dummy links for illustration purposes:
-# If you have actual relationships, you should use those instead
-
-
-# Convert nodes and links into a dictionary
-graph_data = {
-    "nodes": nodes,
-}
-
-# Export the dictionary to a JSON file
-with open('graph_data.json', 'w') as outfile:
-    json.dump(graph_data, outfile)
-  
+pca_df.to_csv('pca_results.csv', columns=['x', 'y', 'id', 'name'], index=False)
 
 

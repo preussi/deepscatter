@@ -4,6 +4,7 @@
 
 
 body {
+  height: auto;
   color: rgb(var(--foreground-rgb));
   background: white;
   margin: 10;

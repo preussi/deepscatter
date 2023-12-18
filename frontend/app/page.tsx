@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import Graph from './Graph';
+import Graph from './Graph_old';
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -43,42 +43,38 @@ export default function Home() {
   };
 
   return (
-    
-    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <div style={{ marginBottom: '20px', marginTop: 10 }}>
+    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', paddingTop: 10 }}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: 0 }}>
         <input
           style={{ border: '2px solid black', borderRadius: '15px', padding: '5px', textAlign: 'center' }}
           onChange={(e) => setQuery(e.target.value)}
           placeholder='Search...'
           value={query}
-            onKeyDown={handleSearchKeyDown}
-          />
+          onKeyDown={handleSearchKeyDown}
+        />
       </div>
-      <div className='flex min-h-screen flex-row items-start p-12'>
-        <div style={{ width: '100%', height: '100%' }}>
-          {graphData && <Graph data={graphData} />}
+      <div style={{ display: 'flex', width: '100%', flexGrow: 1 }}>
+        <div style={{ flex: 2.5, paddingRight: '0px', height: '100%', width: '100%', overflow: 'auto' }}>
+          <iframe src="http://ee-tik-vm054.ethz.ch:3344" style={{ width: '110%', height: '100%' }}></iframe>
         </div>
-        <div className='w-1/3'> {/* Previews container */}
-        {urls.map((urlPair, index) => (
-          <div key={index} className="video-container">
-            <iframe
-              title={`Embedded Video ${index}`}
-              src={`https://www.youtube.com/embed/${new URL(urlPair[0]).searchParams.get('v')}`}
-              className="video-iframe"
-            />
-            <audio
-              title={`Audio Preview ${index}`}
-              src={urlPair[1]}
-              controls
-              className="audio-preview"
-            />
-          </div>
-        ))}
+        <div style={{ flex: 1, height: '100%', overflow: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+          {urls.map((urlPair, index) => (
+            <div key={index} className="video-container" style={{ height: 'fit-content' }}>
+              <iframe
+                title={`Embedded Video ${index}`}
+                src={`https://www.youtube.com/embed/${new URL(urlPair[0]).searchParams.get('v')}`}
+                className="video-iframe"
+              />
+              <audio
+                title={`Audio Preview ${index}`}
+                src={urlPair[1]}
+                controls
+                className="audio-preview"
+              />
+            </div>
+          ))}
         </div>
       </div>
-      
     </main>
   );
 }
-
-

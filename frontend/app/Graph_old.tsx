@@ -90,7 +90,7 @@ const Graph: React.FC<{ data: GraphData }> = ({ data }) => {
   // Set some default width and height attributes for the SVG.
   // Without these, the SVG might not appear at all.
   return (
-    <svg ref={svgRef} width={1400} height={1100} />
+    <svg ref={svgRef} width='100%' height='100%' />
   );
 };
 
