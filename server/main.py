@@ -50,6 +50,11 @@ def search(query):
     x = que(query)
     return x
 
+@app.get("/retrieve")
+def retrieve(id):
+    x = retrieve(id)
+    return x
+
 @app.get("/graph-data")
 def get_graph_data():
     # Define the path to your JSON file
@@ -63,6 +68,17 @@ def get_graph_data():
 
     # Return the JSON data as a response
     return graph_data
+
+def retrieve(id: [] ):
+    ids_to_query = id
+    res = collection.query(
+        expr=f"id in {ids_to_query}",
+        offset=0,
+        limit=10,
+        output_fields=['preview_url_spotify', 'track_name_spotify', 'id'],
+    )
+    print(res)
+    return res
 
 
 def que (query: str):

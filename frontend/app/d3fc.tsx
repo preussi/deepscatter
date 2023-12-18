@@ -86,7 +86,6 @@ const Graph = ({ data }) => {
 
   return (
     <div className="chart-container">
-      <h1>My D3fc Chart</h1>
       <div ref={chartContainerRef} id="scatter-plot" style={{ height: '100%' }}></div>
     </div>
   );
