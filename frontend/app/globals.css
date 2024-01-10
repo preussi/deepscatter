@@ -10,3 +10,13 @@ body {
   margin: 10;
   padding: 20;
 }
+
+/* Hide scrollbar for Chrome, Safari and newer versions of Edge */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+* {
+  scrollbar-width: none;
+}

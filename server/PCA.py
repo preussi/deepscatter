@@ -38,8 +38,9 @@ pca_df = pd.DataFrame(data=pca_result, columns=['x', 'y'])
 # Add identifiers to your DataFrame
 
 pca_df['id'] = range(0, len(pca_df))  # Creates unique identifiers starting from 1
-pca_df['name'] = df['track_name_spotify']
+pca_df['track'] = df['track_name_spotify']
+pca_df['url'] = df['video_url_youtube']
 
-pca_df.to_csv('pca_results.csv', columns=['x', 'y', 'id', 'name'], index=False)
+pca_df.to_csv('pca_results.csv', columns=['x', 'y', 'id', 'track', 'url'], index=False)
 
 
