@@ -1,113 +1,116 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
-
-// ...rest of your imports and utility functions (if any)...
+import React from 'react';
+import ProgressBar from './ProgressBar';
 
 const extractVideoID = (url) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-  
-    return (match && match[2].length === 11) ? match[2] : null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
+const SongTile = ({ title, artist, score, youtubeUrl }) => {
+  const thumbnailUrl = `https://img.youtube.com/vi/${extractVideoID(youtubeUrl)}/maxresdefault.jpg`;
+  const youtubeLink = `https://www.youtube.com/watch?v=${extractVideoID(youtubeUrl)}`;
+
+  // Determine whether title or artist should animate based on their length
+  const shouldAnimateTitle = title.length > 20; // Example condition
+  const shouldAnimateArtist = artist.length > 20; // Example condition
+
+  const tileStyle = {
+    width: '250px',
+    height: '250px',
+    backgroundImage: `url(${thumbnailUrl})`,
+    backgroundSize: 'cover',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: '10px',
+    margin: '10px',
+    position: 'relative',
+    cursor: 'pointer',
+    overflow: 'hidden',
+    backdropFilter: 'blur(5px)',
+    WebkitBackdropFilter: 'blur(5px)',
   };
   
-  const SongTile = ({ title, artist, youtubeUrl, spotifyPreviewUrl }) => {
-    const audioRef = useRef(new Audio(spotifyPreviewUrl));
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [thumbnailUrl, setThumbnailUrl] = useState(`https://img.youtube.com/vi/${extractVideoID(youtubeUrl)}/maxresdefault.jpg`);
-  
-    useEffect(() => {
-      const testImage = new Image();
-      testImage.onload = () => {
-        if (testImage.naturalWidth === 120 && testImage.naturalHeight === 90) {
-          // Default thumbnail is loaded, use a placeholder or lower resolution
-          setThumbnailUrl(`https://img.youtube.com/vi/${extractVideoID(youtubeUrl)}/0.jpg`);
-        }
-      };
-      testImage.onerror = () => {
-        // Handle error, use placeholder image
-        setThumbnailUrl('path/to/your/placeholder.jpg');
-      };
-      testImage.src = thumbnailUrl;
-    }, [youtubeUrl]);
-  
-    const togglePlay = () => {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    };
-  
-    useEffect(() => {
-      audioRef.current.addEventListener('ended', () => setIsPlaying(false));
-      return () => {
-        audioRef.current.removeEventListener('ended', () => setIsPlaying(false));
-      };
-    }, []);
-  
-    const playIconStyle = isPlaying ? {} : { transform: 'translateX(2px)' }; // Adjust as needed
-  
-    const tileStyle = {
-      width: '200px',
-      height: '200px',
-      backgroundImage: `url(${thumbnailUrl})`,
-      backgroundSize: 'cover',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column',
-      padding: '10px',
-      color: 'white',
-      borderRadius: '10px',
-      margin: '10px',
-      position: 'relative', // For absolute positioning of children
-    };
-  
-    const textStyle = {
-      textAlign: 'center', // Center the text
-      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', // Text shadow for better readability
-      margin: '5px 0', // Margin for spacing
-    };
-  
-    const playButtonStyle = {
-      fontSize: '28px', // Adjust icon size as needed
-      color: 'white',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      borderRadius: '50%',
-      border: 'none',
-      cursor: 'pointer',
-      width: '45px', // Fixed width
-      height: '45px', // Fixed height to maintain the circle shape
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 0, // Remove padding to prevent squeezing
-    };
-  
-    const linkStyle = {
-      color: 'white', // Match the color scheme
-      textDecoration: 'none', // Remove underline
-      fontSize: '14px', // Adjust font size
-    };
-  
-    return (
+  const playButtonContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '60px',
+    height: '60px',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white for the blur background
+    borderRadius: '50%', // Circular shape
+    position: 'absolute',
+    backdropFilter: 'blur(8px)', // Blurred background
+    WebkitBackdropFilter: 'blur(8px)', // For Safari
+  };
+
+  const playIconStyle = {
+    width: '60px', // Play icon size
+    height: '60px', // Play icon size
+    fill: 'black', // Icon color
+    border: '1px black solid', // White border around the icon
+    borderRadius: '50%', // Circular shape
+  };
+
+  const textContainerStyle = {
+    background: 'rgba(255, 255, 255, 0.5)',
+    color: 'black',
+    padding: '5px',
+    textAlign: 'center',
+    width: '100%',
+    position: 'absolute',
+    top: '30px',
+    left: '0',
+    backdropFilter: 'blur(5px)',
+    WebkitBackdropFilter: 'blur(5px)',
+  };
+
+  const titleStyle = {
+    fontWeight: 'bold',
+    fontSize: '18px',
+    margin: '0',
+    animation: shouldAnimateTitle ? 'scrollText 10s linear' : 'none',
+    animationIterationCount: shouldAnimateTitle ? '1' : 'none',
+  };
+
+  const artistStyle = {
+    fontWeight: 'normal',
+    fontSize: '16px',
+    margin: '0',
+    color: 'rgba(0, 0, 0, 0.6)', // Lighter text for the artist
+    animation: shouldAnimateArtist ? 'scrollText 10s linear' : 'none',
+    animationIterationCount: shouldAnimateArtist ? '1' : 'none',
+  };
+
+  const progressBarContainerStyle = {
+    position: 'absolute',
+    bottom: '10px',
+    padding: '20px',
+    width: '100%',
+  };
+
+
+  return (
+    <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
       <div style={tileStyle}>
-        <div style={textStyle}>
-          <h4>{title}</h4>
-          <p>{artist}</p>
+        <div style={textContainerStyle}>
+          <div style={titleStyle}>{title}</div>
+          <div style={artistStyle}>{artist}</div>
         </div>
-        <button onClick={togglePlay} style={playButtonStyle}>
-          <span style={playIconStyle}>
-            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-          </span>
-        </button>
-        <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-          Watch on YouTube
-        </a>
+        {/* Play button with circular blur around it */}
+        <div style={playButtonContainerStyle}>
+          <svg style={playIconStyle} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+        <div style={progressBarContainerStyle}>
+          <ProgressBar score={score} />
+        </div>
       </div>
-    );
-  };
+    </a>
+  );
+};
 
 export default SongTile;

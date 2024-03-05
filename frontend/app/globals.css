@@ -2,13 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes scrollText {
+  0% { transform: translateX(100%); }
+  50% { transform: translateX(-100%); }
+  100% { transform: translateX(0%); }
+}
 
-body {
-  height: auto;
-  color: rgb(var(--foreground-rgb));
-  background: black;
-  margin: 10;
-  padding: 20;
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Hide scrollbars and disable scrolling */
+  height: 100vh;
+  width: 100vw;
 }
 
 /* Hide scrollbar for Chrome, Safari and newer versions of Edge */
@@ -19,4 +24,12 @@ body {
 /* Hide scrollbar for Firefox */
 * {
   scrollbar-width: none;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  display: none;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }

@@ -1,8 +1,6 @@
 'use client'
-
-import React, { useState, useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faUpload } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from 'react';
+import SongTile from './SongTile';
 
 const generateYouTubeUrl = (urlPair) => {
   let videoId = new URL(urlPair['0']).searchParams.get('v');
@@ -27,102 +25,66 @@ const generateSpotifyUrl = (urlPair) => {
   return spotifyUrl;
 };
 
-const SongTile = ({ title, artist, thumbnailUrl, youtubeUrl, spotifyPreviewUrl }) => {
-  const audioRef = useRef(new Audio(spotifyPreviewUrl));
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  useEffect(() => {
-    audioRef.current.addEventListener('ended', () => setIsPlaying(false));
-    return () => {
-      audioRef.current.removeEventListener('ended', () => setIsPlaying(false));
-    };
-  }, []);
-
-  const playIconStyle = isPlaying ? {} : { transform: 'translateX(2px)' }; // Adjust as needed
-
-  const tileStyle = {
-    width: '200px',
-    height: '200px',
-    backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), url(${thumbnailUrl})`,
-    backgroundSize: 'cover',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-    padding: '10px',
-    color: 'white',
-    borderRadius: '10px',
-    margin: '10px',
-    position: 'relative', // For absolute positioning of children
-  };
-
-  const textStyle = {
-    textAlign: 'center', // Center the text
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', // Text shadow for better readability
-    margin: '5px 0', // Margin for spacing
-  };
-
-  const playButtonStyle = {
-    fontSize: '28px', // Adjust icon size as needed
-    color: 'white',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: '50%',
-    border: 'none',
-    cursor: 'pointer',
-    width: '45px', // Fixed width
-    height: '45px', // Fixed height to maintain the circle shape
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 0, // Remove padding to prevent squeezing
-  };
-
-  const linkStyle = {
-    color: 'white', // Match the color scheme
-    textDecoration: 'none', // Remove underline
-    fontSize: '14px', // Adjust font size
-  };
-
-  return (
-    <div style={tileStyle}>
-      <div style={textStyle}>
-        <h4>{title}</h4>
-        <p>{artist}</p>
-      </div>
-      <button onClick={togglePlay} style={playButtonStyle}>
-        <span style={playIconStyle}>
-          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-        </span>
-      </button>
-      <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-        Watch on YouTube
-      </a>
-    </div>
-  );
+const generateMetadataContent = () => {
+  if (urls.length > 0) {
+    const mainResult = urls[0];
+    const trackTitle = mainResult[3]; // Assuming this index stores the track title
+    const artistName = mainResult[2]; // Assuming this index stores the artist name
+    return `Track: ${trackTitle}, Artist: ${artistName}`;
+  }
+  return "No results to display."; // Fallback text
 };
 
 export default function Home() {
 
   const [searchInitiated, setSearchInitiated] = useState(false);
-  const [isSearchQuery, setIsSearchQuery] = useState(true); // New state to track the type of query
   const [query, setQuery] = useState(''); // State for the first input
-  const [id, setid] = useState(''); // State for the second input
   const [urls, setUrls] = useState([]);
-  const [isFocused, setIsFocused] = useState(false);
-  
+  const [showUpload, setShowUpload] = useState(false);
+
+  // Function to toggle visibility of upload button
+  const toggleUploadVisibility = () => setShowUpload(!showUpload);
+
+  const sampleQueries = ["Jazzy Ballades", "2000s european electro", "best song ever", "Top Hits"];
+
+  // Function to simulate typing effect
+  const typeEffect = (text, idx = 0) => {
+    if (idx < text.length) {
+      setQuery(text.substring(0, idx + 1));
+      setTimeout(() => typeEffect(text, idx + 1), 200); // Adjust timing as needed
+    }
+  };
+
+  // UseEffect to start typing effect on component mount
+  useEffect(() => {
+    // Randomly select one of the queries
+    const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
+    typeEffect(randomQuery);
+  }, []);
+
+  const generateMetadataContent = () => {
+    if (urls.length > 0) {
+      const mainResult = urls[0];
+      const trackTitle = mainResult[3]; // Assuming this index stores the track title
+      const artistName = mainResult[2]; // Assuming this index stores the artist name
+      return `Track: ${trackTitle}\n Artist: ${artistName}`;
+    }
+    return "No results to display."; // Fallback text
+  };
+
+  // Styles for hidden and visible states of the upload button
+  const uploadButtonStyle = {
+    display: showUpload ? 'block' : 'none', // Show or hide based on state
+    cursor: 'pointer',
+    marginLeft: '10px',
+    color: 'white',
+    // Add other styles as needed
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
+      setIsLoading(true); // Start loading
       const formData = new FormData();
       formData.append("file", file);
   
@@ -140,28 +102,36 @@ export default function Home() {
         setUrls(result); // Assuming `result` is in the correct format for your tiles
       } catch (error) {
         console.error('Error uploading file:', error);
+      } finally {
+        setIsLoading(false); // End loading
       }
     }
   };
   
-  
+  const resultsRef = React.useRef(null);
 
-  // Reset function
-  const handleReset = () => {
-    setUrls([]); // Clear search results
-    setSearchInitiated(false); // Reset search initiated state
-    setQuery(''); // Clear the search query if needed
+  // Function to handle clicks outside of the results container
+  const handleClickOutside = (event) => {
+    if (resultsRef.current && !resultsRef.current.contains(event.target)) {
+      setSearchInitiated(false); // Hide the results
+    }
   };
 
-  // Styles for the reset button
+  // Add event listener when component mounts and remove it when it unmounts
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
-  const handleSearchKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSearchKeyDown = async (event) => {
     if (event.key === 'Enter') {
       try {
         const result = await fetch(`http://ee-tik-vm054.ethz.ch:8000/search?query=${query}`);
         const data = await result.json();
-        setIsSearchQuery(true);
-        setSearchInitiated(true);
+        console.log("Search results:", data); // Debug log
+        setSearchInitiated(true); // Set this to true when search is performed
         setUrls(data);
       } catch (error) {
         console.error("Could not fetch search results:", error);
@@ -169,74 +139,118 @@ export default function Home() {
     }
   };
 
-  {/*const retrieve = async (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      try {
-        const result = await fetch(`http://ee-tik-vm054.ethz.ch:8000/retrieve?id=${id}`);
-        const data = await result.json();
-        setIsSearchQuery(false);
-        setUrls(data);
-      } catch (error) {
-        console.error("Could not fetch search results:", error);
-      }
+  const retrieve = async (id) => {
+    try {
+      const result = await fetch(`http://ee-tik-vm054.ethz.ch:8000/retrieve?id=${id}`);
+      const data = await result.json();
+      console.log("Search results:", data); // Debug log
+      setSearchInitiated(true); // Set this to true when search is performed
+      setUrls(data);
+    } catch (error) {
+      console.error("Could not fetch search results:", error);
     }
-  };*/}
-
-  const resetButtonStyle = {
-    marginLeft: '10px', // Spacing from the search bar
-    padding: '5px 10px', // Padding for the button
-    cursor: 'pointer', // Cursor style
-    // Add more styles as needed...
   };
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+        // Ensure the message is from your D3 visualization
+        // Replace `d3AppOrigin` with the origin of your D3 visualization
+        if (event.origin === 'http://ee-tik-vm054.ethz.ch:3344') {
+            if (event.data.type && event.data.type === 'nodeClicked') {
+                retrieve(event.data.id);
+                console.log('Node clicked with ID:', event.data.id);
+                // You can now use this ID as needed, such as fetching more data
+            }
+        }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Cleanup
+    return () => window.removeEventListener('message', handleMessage);
+}, []);
 
   const searchBarStyle = {
-    padding: '5px 10px',
-    fontSize: '25px',
+    padding: '10px 15px',
+    fontSize: '20px',
     outline: 'none',
-    color: 'black',
+    color: 'white',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     backdropFilter: 'blur(5px)',
     WebkitBackdropFilter: 'blur(5px)',
     borderRadius: '20px',
+    boxSizing: 'border-box'
   };
 
-  const placeholderStyle = `
-  ::placeholder {
-    color: #600; // Darker color for placeholder
-    opacity: 1; // Full opacity for placeholder
-    font-weight: bold; // Bold font weight
-    text-shadow: 3px 3px 3px #fff; // White text shadow for contrast
-  }
-`;
+  const searchContainerStyle = {
+    width: '50%', // Full width to contain the search bar
+    height: '50px', // Fixed height, adjust as needed
+    display: 'flex',
+    justifyContent: 'center', 
+    alignItems: 'center',
+    zIndex: 2,
+    cursor: 'pointer', // Change cursor to indicate it's interactive
+  };
 
-  return (
-    <main style={{ 
+  const searchResultsContainerStyle = {
+    display: 'flex', 
+    flexDirection: 'column',
+    width: '40%', // Adjust the width as needed
+    zIndex: 2,
+    marginTop: '10px', // Adjust based on the height of your search container
+    overflowY: 'auto', // Enable scrolling for overflow
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Opaque black background, adjust opacity as needed
+    padding: '10px', // Add some padding
+    borderRadius: '10px', // Optional, for rounded corners
+  };
+
+  const mainResultStyle = {
+    width: '100%', // Taking full width of the container
+    height: '30vh', // Using 50% of the viewport height to make it take more vertical space
+    border: 'none',
+    borderRadius: '10px',
+  };
+
+  // Adjusted style for the container of additional results
+  const additionalResultsStyle = {
+    overflowY: 'auto', 
+    padding: '10px',
+  };
+
+  // Style for the additional metadata container
+  const metadataContainerStyle = {
+    height: '10vh', // Adjust the height as needed
+    padding: '10px', // Add padding as needed
+    color: 'white', // Text color
+    // Add other styles as needed
+  };
+
+  const hiddenSearchBarStyle = {
+    ...searchBarStyle, // Spread the existing search bar styles
+    opacity: 0, // Make it invisible initially
+    visibility: 'hidden', // Hide it initially
+    transition: 'opacity 0.5s, visibility 0.5s', // Smooth transition for opacity and visibility
+  };
+
+
+return (
+  <main style={{ 
       position: 'relative', 
+      padding: 5,
       height: '100vh', 
       width: '100vw', 
       overflow: 'hidden',
-      display: 'flex', // Use flexbox for layout
-      flexDirection: 'column', // Stack children vertically
-      justifyContent: 'center', // Center horizontally (for the cross-axis of the column direction)
-      alignItems: 'center', // Center vertically (for the main axis of the column direction)
+      display: 'flex', 
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start', // Align items to the start of the main axis
     }}>
-    
-      {/* Full-screen static iframe */}
       <iframe 
         src="http://ee-tik-vm054.ethz.ch:3344" 
         style={{ position: 'fixed', top: 0, left: 0, height: '100%', width: '100%', border: 'none', zIndex: 0 }}
       ></iframe>
-      {/* Overlay content */}
-
       {/* Search bar and Upload*/}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center', // Center horizontally
-        alignItems: 'center', // Align items vertically in the center
-        zIndex: 2,
-        position: 'relative', // Use relative for positioning context
-        width: '100%', // Take the full width to center content
-      }}>
+      <div style={searchContainerStyle}>
         <input
           style={searchBarStyle}
           onChange={(e) => setQuery(e.target.value)}
@@ -244,53 +258,47 @@ export default function Home() {
           value={query}
           onKeyDown={handleSearchKeyDown}
         />
-        <label htmlFor="audio-upload" style={{ cursor: 'pointer', marginLeft: '10px' }}>
-          <FontAwesomeIcon icon={faUpload} size="2x" />
-        </label>
-        <input
-          id="audio-upload"
-          type="file"
-          accept="audio/*"
-          style={{ display: 'none' }}
-          onChange={handleFileUpload}
-        />
       </div>
 
-      {/* Scrollable URL boxes */}
-      <div 
-      style={{ 
-        overflowY: 'auto', // Enable vertical scrolling
-        maxHeight: '90vh', // Set a maximum height for the scrollable area
-        width: '30%', // Maintain the width
-        margin: '20px auto 0', // Center the div horizontally and add top margin
-        display: 'flex', // Use flexbox for inner item alignment
-        flexDirection: 'column', // Stack children vertically
-        alignItems: 'center', // Center children horizontally
-        zIndex: 2
-      }}
-    >
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {urls.map((urlPair, index) => (
-            <SongTile
-              key={index}
-              title={urlPair[3]} // Replace with your actual data keys
-              artist={urlPair[2]} // Replace with your actual data keys
-              spotifyPreviewUrl={generateSpotifyUrl(urlPair)}
-              thumbnailUrl={getYouTubeThumbnail(generateYouTubeUrl(urlPair))} // Replace with your actual data keys
-              youtubeUrl={generateYouTubeUrl(urlPair)} // Replace with your actual data keys
-            />
-          ))}
-        </div>
-      </div>
-      {/*<div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: 0 }}>
-        <input
-          style={{ border: '2px solid black', borderRadius: '15px', padding: '5px', textAlign: 'center' }}
-          onChange={(e) => setid(e.target.value)}
-          placeholder='ID Search...'
-          value={id}
-          onKeyDown={retrieve}
-        />
-      </div>*/}
-    </main>
-  );
+      {/* Search Results */}
+      {searchInitiated && (
+          <div style={searchResultsContainerStyle} ref={resultsRef}>
+            {/* Main Result Div */}
+            {urls.length > 0 && (
+              <div>
+                <iframe
+                  src={generateYouTubeUrl(urls[0])}
+                  style={mainResultStyle}
+                  title="YouTube Video"
+                ></iframe>
+              </div>
+            )}
+
+            <div style={metadataContainerStyle}>
+              {/* Display track and artist name dynamically */}
+              <p>{generateMetadataContent()}</p>
+            </div>
+
+            {/* Additional Results Div */}
+            {urls.length > 1 && (
+              <div style={additionalResultsStyle}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {urls.slice(1).map((urlPair, index) => (
+                    <SongTile
+                      key={urlPair[4]}
+                      title={urlPair[3]}
+                      artist={urlPair[2]}
+                      score={urlPair[5]}
+                      spotifyPreviewUrl={generateSpotifyUrl(urlPair)}
+                      thumbnailUrl={getYouTubeThumbnail(generateYouTubeUrl(urlPair))}
+                      youtubeUrl={generateYouTubeUrl(urlPair)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+  </main>
+);
 }
