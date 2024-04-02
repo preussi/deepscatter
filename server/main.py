@@ -7,12 +7,13 @@ from pymilvus import connections
 from pymilvus import Collection
 import json
 import laion_clap 
+import requests
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://ee-tik-vm054.ethz.ch:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,28 +22,48 @@ app.add_middleware(
 search_params = {
     "metric_type": "COSINE", 
     "offset": 0, 
-    "ignore_growing": False, 
-    "params": {"nlist": 2048}
+    "ignore_growing": False
 }
 
 #time.sleep(60)
 
 connections.connect(
   alias="default",
-  host='milvus-standalone',
+  host='standalone',
   port='19530',
   db_name="default"
 )
 
 collection = Collection("DISCO") 
+collection_caps = Collection("musiccaps")
+collection_caps.load()
 collection.load()
 
 model = laion_clap.CLAP_Module(enable_fusion=False, amodel= 'HTSAT-base')
-model.load_ckpt('music_speech_audioset_epoch_15_esc_89.98.pt') # download the default pretrained checkpoint.
+model.load_ckpt('laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt') # download the default pretrained checkpoint.
+
+@app.get("/youtube-thumbnail/{video_id}")
+async def get_youtube_thumbnail(video_id: str):
+    # Attempt to fetch thumbnails starting from the highest resolution
+    thumbnail_resolutions = ["maxresdefault", "sddefault", "mqdefault", "hqdefault", "default"]
+    for resolution in thumbnail_resolutions:
+        thumbnail_url = f"https://img.youtube.com/vi/{video_id}/{resolution}.jpg"
+        # Check if the thumbnail URL is valid
+        response = requests.head(thumbnail_url)
+        if response.status_code == 200:
+            return {"thumbnail_url": thumbnail_url}
+    
+    raise HTTPException(status_code=404, detail="Thumbnail not found.")
+
 
 @app.get("/")
 def hello():
     print("hello world")
+
+@app.get("/caps-search")
+def caps_search(query):
+    x = caps_que(query)
+    return x
 
 @app.get("/search")
 def search(query):
@@ -51,7 +72,11 @@ def search(query):
 
 @app.get("/retrieve")
 def retrieve(id):
-    x = retrieve(id)
+    res = id_search(id)
+    embedding = [res[0].get('audio_embedding_youtube')]
+    print("test")
+    print(embedding)
+    x = click_search(embedding)
     return x
 
 @app.get("/graph-data")
@@ -68,6 +93,20 @@ def get_graph_data():
     # Return the JSON data as a response
     return graph_data
 
+@app.get("/data/labels")
+def get_labels():
+    # Define the path to your JSON file
+    json_file_path = os.path.join('data/labels.geojson')
+
+    # Check if the file exists
+
+    # Read the JSON file
+    with open(json_file_path, 'r') as file:
+        labels = json.load(file)
+
+    # Return the JSON data as a response
+    return labels
+
 @app.post("/upload-audio/")
 async def upload_audio(file: UploadFile = File(...)):
     # Save the file temporarily
@@ -81,15 +120,36 @@ async def upload_audio(file: UploadFile = File(...)):
         # Optionally, delete the file after processing if it's no longer needed
         os.remove(file_location)
 
-def retrieve(id: [] ):
+def id_search(id: [] ):
     ids_to_query = id
     res = collection.query(
         expr=f"id in [{ids_to_query}]",
         offset=0,
         limit=8,
-        output_fields=['video_url_youtube', 'preview_url_spotify', 'track_name_spotify', 'id'],
+        output_fields=['id', 'x', 'y', 'video_url_youtube', 'primary_artist_name_spotify', 'track_name_spotify', 'audio_embedding_youtube'],
     )
     return res
+
+def click_search(input: list):
+    results = collection.search(
+        data=input,
+        anns_field="audio_embedding_youtube", 
+        # the sum of `offset` in `param` and `limit` 
+        # should be less than 16384.
+        param=search_params,
+        limit=16,
+        expr=None,
+        # set the names of the fields you want to 
+        # retrieve from the search result.
+        output_fields=['id', 'x', 'y', 'video_url_youtube', 'primary_artist_name_spotify', 'track_name_spotify'],
+        consistency_level="Strong"
+    )
+
+    res = [(hit.entity.get('id'), hit.entity.get('x'), hit.entity.get('y'), 
+            hit.entity.get('video_url_youtube'), hit.entity.get('primary_artist_name_spotify'), 
+            hit.entity.get('track_name_spotify'), hit.entity.score) for hits in results for hit in hits]
+    return res
+
 
 def audio_search (file: str):
     # Directly get audio embeddings from audio files
@@ -105,7 +165,7 @@ def audio_search (file: str):
 
     results = collection.search(
         data=input,
-        anns_field="audio_embedding_spotify", 
+        anns_field="audio_embedding_youtube", 
         # the sum of `offset` in `param` and `limit` 
         # should be less than 16384.
         param=search_params,
@@ -113,23 +173,29 @@ def audio_search (file: str):
         expr=None,
         # set the names of the fields you want to 
         # retrieve from the search result.
-        output_fields=['video_url_youtube', 'preview_url_spotify', 'primary_artist_name_spotify', 'track_name_spotify', 'id'],
+        output_fields=['id', 'x', 'y', 'video_url_youtube', 'primary_artist_name_spotify', 'track_name_spotify'],
         consistency_level="Strong"
     )
 
-    return [(hit.entity.get('video_url_youtube'), hit.entity.get('preview_url_spotify'), hit.entity.get('primary_artist_name_spotify'), hit.entity.get('track_name_spotify'), hit.entity.get('id')) for hits in results for hit in hits]
+    res = [(hit.entity.get('id'), hit.entity.get('x'), hit.entity.get('y'), 
+            hit.entity.get('video_url_youtube'), hit.entity.get('primary_artist_name_spotify'), 
+            hit.entity.get('track_name_spotify'), hit.entity.score) for hits in results for hit in hits]
+    return res
 
-def que (query: str):
-    text_data = query.split('+')
-    if len(text_data) > 1:
+def caps_que (query: str):
+
+    if '+' in query:
+        text_data = query.split('+')
         text_embed = model.get_text_embedding(text_data)
         input = text_embed.sum(axis=0)
     else:
+        text_data = [query]
         text_data.append("")
         input = model.get_text_embedding(text_data)[0]
-    results = collection.search(
+
+    results = collection_caps.search(
         data=[input],
-        anns_field="audio_embedding_spotify", 
+        anns_field="audio_embedding_youtube", 
         # the sum of `offset` in `param` and `limit` 
         # should be less than 16384.
         param=search_params,
@@ -137,8 +203,40 @@ def que (query: str):
         expr=None,
         # set the names of the fields you want to 
         # retrieve from the search result.
-        output_fields=['video_url_youtube', 'preview_url_spotify', 'primary_artist_name_spotify', 'track_name_spotify', 'id'],
+        output_fields=['links'],
         consistency_level="Strong"
     )
+    
+    res = [(hit.entity.get('links'), hit.entity.get('id'), hit.entity.score) for hits in results for hit in hits]
+    return res
 
-    return [(hit.entity.get('video_url_youtube'), hit.entity.get('preview_url_spotify'), hit.entity.get('primary_artist_name_spotify'), hit.entity.get('track_name_spotify'), hit.entity.get('id')) for hits in results for hit in hits]
+def que (query: str):
+
+    if '+' in query:
+        text_data = query.split('+')
+        text_embed = model.get_text_embedding(text_data)
+        input = text_embed.sum(axis=0)
+    else:
+        text_data = [query]
+        text_data.append("")
+        input = model.get_text_embedding(text_data)[0]
+
+    results = collection.search(
+        data=[input],
+        anns_field="audio_embedding_youtube", 
+        # the sum of `offset` in `param` and `limit` 
+        # should be less than 16384.
+        param=search_params,
+        limit=16,
+        expr=None,
+        # set the names of the fields you want to 
+        # retrieve from the search result.
+        output_fields=['id', 'x', 'y', 'video_url_youtube', 'primary_artist_name_spotify', 'track_name_spotify'],
+        consistency_level="Strong"
+    )
+    
+    res = [(hit.entity.get('id'), hit.entity.get('x'), hit.entity.get('y'), 
+            hit.entity.get('video_url_youtube'), hit.entity.get('primary_artist_name_spotify'), 
+            hit.entity.get('track_name_spotify'), hit.entity.score) for hits in results for hit in hits]
+    
+    return res
