@@ -1,0 +1,44 @@
+{
+  "classes": [
+      {
+          "class": "Rock",
+          "description": "This audio is a rock song"
+      },
+      {
+          "class": "Classical",
+          "description": "This audio is a classical song"
+      },
+      {
+          "class": "Jazz",
+          "description": "This audio is a jazz song"
+      },
+      {
+          "class": "Pop",
+          "description": "This audio is a pop song"
+      },
+      {
+          "class": "Hiphop",
+          "description": "This audio is a hip hop song"
+      },
+      {
+          "class": "Blues",
+          "description": "This audio is a blues song"
+      },
+      {
+          "class": "Country",
+          "description": "This audio is a country song"
+      },
+      {
+          "class": "Reggae",
+          "description": "This audio is a reggae song"
+      },
+      {
+          "class": "Disco",
+          "description": "This audio is a disco song"
+      },
+      {
+          "class": "Metal",
+          "description": "This audio is a metal song"
+      }
+  ]
+}

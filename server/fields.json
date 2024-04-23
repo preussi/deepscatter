@@ -1,0 +1,25 @@
+{
+    "fields": [
+      {
+        "name": "text",
+        "dtype": "VARCHAR",
+        "max_length": 1000
+      },
+      {
+        "name": "accent",
+        "dtype": "VARCHAR",
+        "max_length": 1000
+      },
+      {
+        "name": "region",
+        "dtype": "VARCHAR",
+        "max_length": 1000
+      },
+      {
+        "name": "age",
+        "dtype": "FLOAT",
+        "max_length": 1000
+      }
+    ]
+  }
+  
