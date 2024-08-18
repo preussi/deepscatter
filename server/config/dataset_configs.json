@@ -18,5 +18,13 @@
     "ESC50": {
         "model_checkpoint": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
         "output_fields": ["id", "x", "y", "class", "title", "link"]
+    },
+    "fma": {
+        "model_checkpoint": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link", "artist_name", "album_title"]
+    },
+    "jamendo": {
+        "model_checkpoint": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link", "ARTIST_NAME", "ALBUM_NAME"]
     }
 }

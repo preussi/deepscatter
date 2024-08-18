@@ -1,18 +1,22 @@
 {   
-    "DATASET": "DISCOX/musiccaps-viz",
-    "DATASET_NAME": "musiccaps",
-    "EMBEDDING_FIELD": "audio_embedding_youtube",
-    "LINK_FIELD": "ID",
-    "NAME_FIELD": "Description",
+    "DATASET_PATH": "jamendo_dataset",
+    "DATASET_NAME": "jamendo",
+    "EMBEDDING_FIELD": "embedding",
+    "LINK_FIELD": "URL",
+    "NAME_FIELD": "TRACK_NAME",
     "MODEL": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
     "frontend": "http://82.130.102.10:3000",
     "server": "http://ee-tik-vm054.ethz.ch:8000",
     "fields": [
         {
-            "name": "start_s",
-            "dtype": "FLOAT",
+            "name": "ARTIST_NAME",
+            "dtype": "VARCHAR",
             "max_length": 1000
-
+        },
+        {
+            "name": "ALBUM_NAME",
+            "dtype": "VARCHAR",
+            "max_length": 1000
         }
     ],
     "classes": [
@@ -65,8 +69,42 @@
             "class": "Classical",
             "description": "This is a Classical song",
             "color": "orange"
+        },
+        {
+            "class": "Electronic",
+            "description": "This is a Electronic song",
+            "color": "lime"
+        },
+        {
+            "class": "Folk",
+            "description": "This is a Folk song",
+            "color": "teal"
+        },
+        {
+            "class": "Reggaeton",
+            "description": "This is a Reggaeton song",
+            "color": "lightblue"
+        },
+        {
+            "class": "Dubstep",
+            "description": "This is a Dubstep song",
+            "color": "lightgreen"
+        },
+        {
+            "class": "Soul",
+            "description": "This is a Soul song",
+            "color": "lightyellow"
+        },
+        {
+            "class": "World",
+            "description": "This is a World song",
+            "color": "lightaqua"
+        },
+        {
+            "class": "Noise",
+            "description": "This is noise",
+            "color": "lightcyan"
         }
-        
     ]
 }
   
