@@ -1,0 +1,158 @@
+{   
+    "DATASET": "DISCOX/DISCO-200K-high-quality",
+    "DATASET_NAME": "disco",
+    "EMBEDDING_FIELD": "audio_embedding_youtube",
+    "LINK_FIELD": "video_url_youtube",
+    "NAME_FIELD": "video_title_youtube",
+    "MODEL": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
+
+}
+
+{
+    "DATASET": "DISCOX/yt8m-mtc",
+    "DATASET_NAME": "yt8m",
+    "EMBEDDING_FIELD": "clap",
+    "LINK_FIELD": "video_id",
+    "NAME_FIELD": "text",
+    "MODEL": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+}
+  
+{
+    "DATASET": "DISCOX/musiccaps-viz",
+    "DATASET_NAME": "musiccaps",
+    "EMBEDDING_FIELD": "audio_embedding_youtube",
+    "LINK_FIELD": "ID",
+    "NAME_FIELD": "Description",
+    "MODEL": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+}  
+
+{    
+    "DATASET": "ESC-50",
+    "DATASET_NAME": "ESC50",
+    "EMBEDDING_FIELD": "embedding",
+    "LINK_FIELD": "filename",
+    "NAME_FIELD": "filename",
+    "MODEL": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+}
+
+{   
+    "DATASET": "DISCOX/vctk_clap",
+    "DATASET_NAME": "vctk",
+    "EMBEDDING_FIELD": "clap",
+    "LINK_FIELD": "file",
+    "NAME_FIELD": "text",
+    "MODEL": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
+    "fields": [
+        {
+            "name": "start",
+            "dtype": "INT64",
+            "max_length": 1000
+
+        }
+    ],
+    "classes": [
+        {
+            "class": "Rock",
+            "description": "This is a Rock song",
+            "color": "red"
+        },
+        {
+            "class": "Metal",
+            "description": "This is a Metal song",
+            "color": "blue"
+        },
+        {
+            "class": "Pop",
+            "description": "This is a Pop song",
+            "color": "green"
+        },
+        {
+            "class": "Disco",
+            "description": "This is a Disco song",
+            "color": "yellow"
+        },
+        {
+            "class": "HipHop",
+            "description": "This is a HipHop song",
+            "color": "purple"
+        },
+        {
+            "class": "Classical",
+            "description": "This is a Classical song",
+            "color": "orange"
+        },
+        {
+            "class": "Jazz",
+            "description": "This is a Jazz song",
+            "color": "aqua"
+        },
+        {
+            "class": "Blues",
+            "description": "This is a Blues song",
+            "color": "brown"
+        },
+        {
+            "class": "Reggae",
+            "description": "This is a Reggae song",
+            "color": "cyan"
+        },
+        {
+            "class": "Country",
+            "description": "This is a Country song",
+            "color": "pink"
+        }
+    ],
+    "classes": [
+        {"class": "Dog", "description": "This audio is a Dog", "color": "#B76E79"},
+        {"class": "Rain", "description": "This audio is Rain", "color": "#7FB7BE"},
+        {"class": "Crying baby", "description": "This audio is a Crying baby", "color": "#F4CCCC"},
+        {"class": "Door knock", "description": "This audio is a Door knock", "color": "#D9EAD3"},
+        {"class": "Door, wood creaks", "description": "This audio is a Door, wood creaks", "color": "#B9EAD3"},
+        {"class": "Helicopter", "description": "This audio is a Helicopter", "color": "#999999"},
+        {"class": "Train", "description": "This audio is a Train", "color": "#999966"},
+        {"class": "Rooster", "description": "This audio is a Rooster", "color": "#E06666"},
+        {"class": "Sea waves", "description": "This audio is Sea waves", "color": "#6FA8DC"},
+        {"class": "Sneezing", "description": "This audio is Sneezing", "color": "#FFE599"},
+        {"class": "Mouse click", "description": "This audio is a Mouse click", "color": "#CCCCCC"},
+        {"class": "Chainsaw", "description": "This audio is a Chainsaw", "color": "#6AA84F"},
+        {"class": "Pig", "description": "This audio is a Pig", "color": "#F4CCCC"},
+        {"class": "Crackling fire", "description": "This audio is a Crackling fire", "color": "#CC0000"},
+        {"class": "Clapping", "description": "This audio is Clapping", "color": "#FFE599"},
+        {"class": "Keyboard typing", "description": "This audio is Keyboard typing", "color": "#B7B7B7"},
+        {"class": "Siren", "description": "This audio is a Siren", "color": "#FF0000"},
+        {"class": "Cow", "description": "This audio is a Cow", "color": "#A4C2F4"},
+        {"class": "Crickets", "description": "This audio is Crickets", "color": "#93C47D"},
+        {"class": "Breathing", "description": "This audio is Breathing", "color": "#D9D2E9"},
+        {"class": "Car horn", "description": "This audio is a Car horn", "color": "#FF9900"},
+        {"class": "Frog", "description": "This audio is a Frog", "color": "#93C47D"},
+        {"class": "Chirping birds", "description": "This audio is Chirping birds", "color": "#B6D7A8"},
+        {"class": "Coughing", "description": "This audio is Coughing", "color": "#E6B8AF"},
+        {"class": "Can opening", "description": "This audio is a Can opening", "color": "#CCCCCC"},
+        {"class": "Engine", "description": "This audio is an Engine", "color": "#666666"},
+        {"class": "Cat", "description": "This audio is a Cat", "color": "#EAD1DC"},
+        {"class": "Water drops", "description": "This audio is Water drops", "color": "#A2C4C9"},
+        {"class": "Footsteps", "description": "This audio is Footsteps", "color": "#D9D9D9"},
+        {"class": "Washing machine", "description": "This audio is a Washing machine", "color": "#A4C2F4"},
+        {"class": "Hen", "description": "This audio is a Hen", "color": "#F9CB9C"},
+        {"class": "Wind", "description": "This audio is Wind", "color": "#A4C2F4"},
+        {"class": "Laughing", "description": "This audio is Laughing", "color": "#FFFF99"},
+        {"class": "Vacuum cleaner", "description": "This audio is a Vacuum cleaner", "color": "#999999"},
+        {"class": "Church bells", "description": "This audio is Church bells", "color": "#D5A6BD"},
+        {"class": "Insects (flying)", "description": "This audio is Insects (flying)", "color": "#B6D7A8"},
+        {"class": "Pouring water", "description": "This audio is Pouring water", "color": "#A2C4C9"},
+        {"class": "Brushing teeth", "description": "This audio is Brushing teeth", "color": "#D9EAD3"},
+        {"class": "Clock alarm", "description": "This audio is a Clock alarm", "color": "#F6B26B"},
+        {"class": "Airplane", "description": "This audio is an Airplane", "color": "#999999"},
+        {"class": "Sheep", "description": "This audio is a Sheep", "color": "#CFE2F3"},
+        {"class": "Toilet flush", "description": "This audio is a Toilet flush", "color": "#A4C2F4"},
+        {"class": "Snoring", "description": "This audio is Snoring", "color": "#D9D2E9"},
+        {"class": "Clock tick", "description": "This audio is a Clock tick", "color": "#CCCCCC"},
+        {"class": "Fireworks", "description": "This audio is Fireworks", "color": "#A4C2F4"},
+        {"class": "Crow", "description": "This audio is a Crow", "color": "#666666"},
+        {"class": "Thunderstorm", "description": "This audio is a Thunderstorm", "color": "#434343"},
+        {"class": "Drinking, sipping", "description": "This audio is Drinking, sipping", "color": "#D9EAD3"},
+        {"class": "Glass breaking", "description": "This audio is Glass breaking", "color": "#E06666"},
+        {"class": "Hand saw", "description": "This audio is a Hand saw", "color": "#A4C2F4"}
+    ]    
+
+}

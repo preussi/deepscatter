@@ -2,12 +2,13 @@ import os
 import shutil
 from typing import Union
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pymilvus import connections
 from pymilvus import Collection
 import json
 from laion_clap import CLAP_Module
-import requests
+import soundfile as sf
 
 app = FastAPI()
 
@@ -20,13 +21,17 @@ app.add_middleware(
 )
 
 search_params = {
+    "index_type": "IVF_FLAT",
     "metric_type": "COSINE", 
-    "offset": 0, 
-    "ignore_growing": False
+    "params": {"nlist": 256},
 }
 
-#time.sleep(60)
+# Path to the JSON file
+json_file_path = './config/dataset_configs.json'
+with open(json_file_path, 'r') as file:
+    dataset_configs = json.load(file)
 
+print(dataset_configs)
 connections.connect(
   alias="default",
   host='standalone',
@@ -52,7 +57,7 @@ class DatasetManager:
         results = self.collection.search(
             data=[input_embedding],
             anns_field="embedding",
-            param={"metric_type": "COSINE", "index_type": "FLAT"},
+            param=search_params,
             limit=13,
             expr=None,
             output_fields=output_fields,
@@ -100,28 +105,16 @@ class DatasetManager:
         return res
     
     def get_audio_embedding_from_filelist(self, x):
-        audio_embedding = self.model.get_audio_embedding_from_filelist(x)
-        return audio_embedding
-
-
-dataset_configs = {
-    "disco": {
-        "model_checkpoint": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
-        "output_fields": ['id', 'x', 'y', 'class', 'title', 'link']
-    },
-    "yt8m": {
-        "model_checkpoint": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
-        "output_fields": ['id', 'x', 'y', 'class', 'title', 'link']
-    },
-    "vctk": {
-        "model_checkpoint": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
-        "output_fields": ['id', 'x', 'y', 'class', 'title', 'link']
-    },
-    "musiccaps": {
-        "model_checkpoint": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
-        "output_fields": ['id', 'x', 'y', 'class', 'title', 'link']
-    }
-}
+        audio_data, sample_rate = sf.read(x)
+        # Calculate the number of samples in a 10-second snippet
+        snippet_duration = 5  # in seconds
+        snippet_samples = int(snippet_duration * sample_rate)
+        # Take the first 10 seconds of the audio data
+        audio_snippet = audio_data[:snippet_samples]
+        # Pass the audio snippet to the search function
+        audio = audio_snippet.reshape(1, -1) # Make it (1,T) or (N,T)
+        audio_embed = self.model.get_audio_embedding_from_data(x = audio)
+        return audio_embed
 
 datasets = {name: DatasetManager(name, **config) for name, config in dataset_configs.items()}
 
@@ -158,11 +151,19 @@ async def upload_audio(file: UploadFile = File(...), dataset: str = Form(...)):
     # Process the audio file and run the search
     try:
         # Pass the dataset along with the file_location to the audio_search function
-        audio_embedding = manager.get_audio_embedding_from_filelist([file_location])
+        audio_embedding = manager.get_audio_embedding_from_filelist(file_location)
         return manager.audio_search(audio_embedding)
     finally:
         # Optionally, delete the file after processing if it's no longer needed
         os.remove(file_location)
+
+@app.get("/data/audio/{dataset}/{file_name}")
+async def get_audio_data(dataset: str, file_name: str):
+    file_path = os.path.join("audio_files", dataset, file_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(path=file_path, media_type='audio/flac', filename=file_name)
+
 
 @app.get("/data/labels/{dataset}")
 def get_labels(dataset: str):

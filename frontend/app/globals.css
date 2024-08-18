@@ -3,10 +3,15 @@
 @tailwind utilities;
 
 @keyframes scrollText {
-  0% { transform: translateX(100%); }
-  50% { transform: translateX(-100%); }
-  100% { transform: translateX(0%); }
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
+
+
 
 html, body {
   margin: 0;
@@ -26,10 +31,115 @@ html, body {
   scrollbar-width: none;
 }
 
+option { 
+  /* Whatever color  you want */
+  background-color: #000;
+}
+
 .scrollable-content::-webkit-scrollbar {
   display: none;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+.loading-animation {
+  border: 8px solid #f3f3f3; /* Light grey */
+  border-top: 8px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.file-drop-container {
+  margin-top: 20px;
+  padding: 20px;
+  text-decoration: beige;
+  border-radius: 10px;
+  transition-duration: 0.5s;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 99;
+}
+
+.file-drop-container.dragging {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid white;
+  margin-top: 0;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99;
+  background-color: rgba(0, 0, 0, 0.5); /* Slightly dimmed background */
+}
+
+.searchContainerStyle {
+  width: 50%; /* Full width to contain the search bar */
+  height: 50px; /* Fixed height, adjust as needed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  cursor: pointer; /* Change cursor to indicate it's interactive */
+}
+
+.searchBarStyle {
+  padding: 10px 15px;
+  font-size: 20px;
+  outline: none;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 1);
+  border-radius: 20px;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+@media screen and (max-width: 5px) {
+  .searchResultsContainerStyle {
+    display: flex;
+    flex-direction: column;
+    width: 10%;
+    z-index: 2;
+    margin-top: 10px;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+  }
+}
+
+.mainResultStyle {
+  width: 100%;
+  height: 40vh;
+  border: 1px solid gray;
+  border-radius: 10px;
+  border-blur: 10px;
+}
+
+.additionalResultsStyle {
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid gray;
+  border-radius: 10px;
+  border-blur: 10px;
+}
+
+.metadataContainerStyle {
+  height: 10vh;
+  padding: 10px;
+  color: white;
+  margin: 10px 0;
 }

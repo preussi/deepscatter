@@ -1,0 +1,72 @@
+{   
+    "DATASET": "DISCOX/musiccaps-viz",
+    "DATASET_NAME": "musiccaps",
+    "EMBEDDING_FIELD": "audio_embedding_youtube",
+    "LINK_FIELD": "ID",
+    "NAME_FIELD": "Description",
+    "MODEL": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+    "frontend": "http://82.130.102.10:3000",
+    "server": "http://ee-tik-vm054.ethz.ch:8000",
+    "fields": [
+        {
+            "name": "start_s",
+            "dtype": "FLOAT",
+            "max_length": 1000
+
+        }
+    ],
+    "classes": [
+        {
+            "class": "Rock",
+            "description": "This is a Rock song",
+            "color": "red"
+        },
+        {
+            "class": "Metal",
+            "description": "This is a Metal song",
+            "color": "blue"
+        },
+        {
+            "class": "Pop",
+            "description": "This is a Pop song",
+            "color": "green"
+        },
+        {
+            "class": "Disco",
+            "description": "This is a Disco song",
+            "color": "yellow"
+        },
+        {
+            "class": "HipHop",
+            "description": "This is a HipHop song",
+            "color": "purple"
+        },
+        {
+            "class": "Jazz",
+            "description": "This is a Jazz song",
+            "color": "aqua"
+        },
+        {
+            "class": "Blues",
+            "description": "This is a Blues song",
+            "color": "brown"
+        },
+        {
+            "class": "Reggae",
+            "description": "This is a Reggae song",
+            "color": "cyan"
+        },
+        {
+            "class": "Country",
+            "description": "This is a Country song",
+            "color": "pink"
+        },
+        {
+            "class": "Classical",
+            "description": "This is a Classical song",
+            "color": "orange"
+        }
+        
+    ]
+}
+  

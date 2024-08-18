@@ -1,42 +1,52 @@
 import numpy as np
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
-from datasets import load_dataset
+from datasets import load_dataset, load_from_disk, Dataset
 from sklearn.manifold import TSNE
 import json
 from laion_clap import CLAP_Module
 import torch
 from huggingface_hub import login
+import pandas as pd
+
+with open('./config/config.json', 'r') as file:
+    config = json.load(file)    
 
 # Authenticate and set up parameters
 login(token="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")
 DIMENSION = 512
 MILVUS_HOST = "milvus-standalone"
 MILVUS_PORT = "19530"
-DATASET = 'DISCOX/vctk_clap'
-DATASET_NAME = 'vctk'
-LINK_FIELD = 'speaker_id'
-NAME_FIELD = 'text'
-EMBEDDING_FIELD = 'clap'
-MODEL = 'laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt'
+
+DATASET = config['DATASET']
+DATASET_NAME = config['DATASET_NAME']
+EMBEDDING_FIELD = config['EMBEDDING_FIELD']
+LINK_FIELD = config['LINK_FIELD']
+NAME_FIELD = config['NAME_FIELD']
+MODEL = config['MODEL']
+
+index_params = {"metric_type":"COSINE", 
+                "index_type":"IVF_FLAT",
+                "params":{"nlist": 256}}
 
 # Load the dataset directly into the Dataset object
-dataset = load_dataset(DATASET, split='train')
+if DATASET == 'ESC-50':
+    dataset = load_from_disk(DATASET)
+else:
+    dataset = load_dataset(DATASET, split='train')
+    print(dataset.features)
 
-with open('fields.json', 'r') as file:
-    dataset_fields_data = json.load(file)
+if DATASET_NAME == 'vctk':
+    dataset = dataset.remove_columns(['audio'])
 
-additional_fields = [field['name'] for field in dataset_fields_data['fields']]
+additional_fields = config.get('fields', [])
 essential_fields = [EMBEDDING_FIELD, LINK_FIELD, NAME_FIELD]
-fields_to_check = essential_fields + additional_fields
-fields_to_check = [EMBEDDING_FIELD, LINK_FIELD, NAME_FIELD]
+fields_to_check = essential_fields + [field['name'] for field in additional_fields]
 
 dataset_fields = [
-    FieldSchema(name=field['name'], dtype=DataType[field['dtype']], max_length=field['max_length'])
-    for field in dataset_fields_data['fields']
+    FieldSchema(name=field['name'], dtype=DataType[field['dtype']], max_length=field.get('max_length', 1000))
+    for field in additional_fields
 ]
 
-# Load the dataset
-dataset = load_dataset(DATASET, split='train')
 
 # Define a function to check if a field is non-empty
 def is_non_empty(field_value):
@@ -46,26 +56,29 @@ def is_non_empty(field_value):
         return False
     return True
 
-
 # Filter the dataset
 filtered_dataset = dataset.filter(lambda x: all(is_non_empty(x[field]) for field in fields_to_check))
-
 print("Filtered dataset:", filtered_dataset)
-filtered_dataset = dataset.filter(lambda x: x[EMBEDDING_FIELD] is not None and len(x[EMBEDDING_FIELD]) == DIMENSION)
+
+#claps = load_from_disk('musiccaps')
+#assert len(filtered_dataset) == len(claps), "Datasets must be of the same length"
+
+# Replace the column
+#def replace_column(example):
+#    example[EMBEDDING_FIELD] = claps['embedding']
+#    return example
+
+#filtered_dataset = filtered_dataset.map(replace_column, with_indices=False, batched=True, batch_size=len(filtered_dataset))
 
 # Define the model
 model = CLAP_Module(enable_fusion=False, amodel='HTSAT-base')
 model.load_ckpt(MODEL)
 
-# Load class data
-with open('classes.json', 'r') as file:
-    class_data = json.load(file)
-classes = class_data['classes']
-
 # Generate embeddings for each class
 def embed(description):
     return model.get_text_embedding([description, ""], use_tensor=True)[0]
 
+classes = config['classes']  
 class_embeddings = {cls['class']: embed(cls['description']) for cls in classes}
 
 # Define cosine similarity function
@@ -79,7 +92,7 @@ def apply_tsne(batch):
     tsne_result = tsne.fit_transform(embeddings)
     return {"x": tsne_result[:, 0], "y": tsne_result[:, 1]}
 
-tsne_dataset = filtered_dataset.map(apply_tsne, batched=True, batch_size=1000)
+tsne_dataset = filtered_dataset.map(apply_tsne, batched=True, batch_size=len(filtered_dataset))
 
 # Classify embeddings and map results
 def classify_class(row):
@@ -100,7 +113,12 @@ final_dataset = classified_dataset.map(finalize_dataset, with_indices=True, batc
 csv_file_path = f"data/graph/{DATASET_NAME}_graph.csv"
 final_dataset.to_csv(csv_file_path, columns=['id', 'x', 'y', 'class', NAME_FIELD])
 print(f"Dataset saved to {csv_file_path}")
+with open('labeler.py', 'r') as file:
+    exec(file.read())
 
+with open('html_generator.py', 'r') as file:
+    exec(file.read())
+    
 # Set up Milvus connection and schema
 connections.connect("default", host=MILVUS_HOST, port=MILVUS_PORT, db_name="default")
 fields = [
@@ -118,12 +136,12 @@ if utility.has_collection(DATASET_NAME):
 
 schema = CollectionSchema(fields=fields, enable_dynamic_field=True)
 collection = Collection(name=DATASET_NAME, schema=schema)
-collection.create_index(field_name="embedding", index_params={"metric_type":"COSINE", "index_type":"FLAT"})
+collection.create_index(field_name="embedding", index_params=index_params)
 collection.load()
 
 # Insert data into Milvus
 current_id = 0
-additional_field_names = [field['name'] for field in dataset_fields_data['fields']]
+additional_field_names = [field['name'] for field in additional_fields]
 
 def insert_function(batch):
     global current_id

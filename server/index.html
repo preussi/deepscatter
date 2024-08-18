@@ -1,0 +1,229 @@
+<style>
+    .ttooltip {
+      z-index: 99; /* Keeps tooltip above other content */
+    }
+    body {
+      margin: 0;
+      padding: 0;/* Hide scrollbars and disable scrolling */
+      height: 100vh;
+      width: 100vw;
+      z-index: 2;
+    }
+  </style>
+  
+  <body>
+    <div id="deepscatter"></div>
+  </body>
+  <head>
+    <style>
+      .buttons-container {
+        background-color: black;
+        padding: 10px;
+        color: white; /* Ensures the text color is white for better contrast */
+        display: flex; /* Aligns items in a row */
+        gap: 10px; /* Adds space between items */
+        justify-content: left; /* Center-aligns the items */
+      }
+      /* Existing styles... */
+      dt {
+        float: left;
+        clear: left;
+        width: 90px;
+        font-weight: bold;
+        color: rgb(128, 19, 0);
+      }
+      dt::after {
+        content: ':';
+      }
+      dd {
+        margin: 0 0 0 80px;
+        padding: 0 0 0.5em 0;
+        width: 180px;
+      }
+      /* Additional styles for input and buttons for better visibility */
+      .buttons-container input, .buttons-container button {
+        color: black; /* Text color for inputs and buttons */
+        background-color: white; /* Background color for inputs and buttons */
+        border: 1px solid gray; /* Adds a border to make elements distinct */
+        padding: 5px 10px; /* Adds some padding inside inputs and buttons */
+      }
+    </style>
+  </head>
+  
+  <script type="module">
+    import Scatterplot from './src/deepscatter';
+    import { Bitmask, DataSelection } from './src/selection';
+    import { select } from 'd3-selection';
+    
+  
+    const server = 'server_placeholder';
+    const frontend = 'frontend_placeholder';
+    const DATASET_NAME = 'DATASET_NAME_PLACEHOLDER';
+    const NAME_FIELD = 'NAME_FIELD_PLACEHOLDER';
+    
+    window.select = select; // For the click function below.
+    const prefs = ({
+      source_url: '/data/'+DATASET_NAME,
+      max_points: 1000000, // a full cap.
+      alpha: 30, // Target saturation for the full page.
+      zoom_balance: 0.5, // Rate at which points increase size. https://observablehq.com/@bmschmidt/zoom-strategies-for-huge-scatterplots-with-three-js
+      point_size: 3, // Default point size before application of size scaling
+      background_color: 'black',
+      duration: 500,
+      encoding: {
+        /**
+        Note--if you do not have a field called 'class' in your dataset, this will fail!
+        */
+        color: {
+          field: 'class',
+          domain: [DOMAINS_PLACEHOLDER],
+          range: [RANGE_PLACEHOLDER],
+        },
+        x: {
+          field: 'x',
+          transform: 'literal',
+        },
+        y: {
+          field: 'y',
+          transform: 'literal',
+        }
+      },
+    });
+  
+  
+    async function setupScatterPlot() {
+      // Initialize your scatterplot with preferences if you haven't already
+      const plot = new Scatterplot('#deepscatter'); // Adjust dimensions as needed
+      await plot.plotAPI(prefs);
+      console.log("data:", plot);
+      let shouldClearHighlights = true;
+  
+      function initialZoom() {
+        plot._zoom.zoom_to(0.7, 0, 0);
+      }
+  
+      initialZoom();
+  
+  
+      plot.click_function = async (datum) => {
+        // Construct the message you want to send
+        const message = {
+            type: 'NODE_CLICKED',
+            id: datum.id,
+            dataset: DATASET_NAME
+        };
+        window.parent.postMessage(message, frontend);
+      };
+  
+  
+      async function highlightData(genre) {
+        const genreColors = {
+          COLOR_MAPPINGS_PLACEHOLDER
+        };
+        const color = genreColors[genre] || 'gray'; // Default color if genre not found
+        // Assuming 'highlightFlag' logic is handled elsewhere in your dataset
+  
+        // Update the plot with new encoding based on the selected genre
+        await plot.plotAPI({
+              encoding: {
+                color: {
+                  field: genre, // Use the selected genre as the field for color encoding
+                  type: 'nominal',
+                  domain: [0, 1], // Assuming binary flag for genre presence
+                  range: ['#3337', color] // Non-highlighted in light gray, highlighted in genre color
+                }
+              }
+            
+        });
+      }
+  
+      // The rest of your scatterplot setup, such as adding labels
+      plot.add_labels_from_url(
+        server+'/data/labels/'+DATASET_NAME,
+        'location',
+        'LOCATION',
+        undefined, // no size field
+        { useColorScale: true, margin: 0, draggable_labels: false}
+      );
+  
+      async function customLabelClickFunction(datum) {
+          const genre = datum.text;
+          // Now, call your existing highlightData function with this genre
+          highlightData(genre);
+          shouldClearHighlights = false;
+      }
+      plot.label_click = customLabelClickFunction;   
+  
+  
+      async function clearHighlights() {
+          // Reset the encoding to the initial configuration defined in prefs
+          await plot.plotAPI({
+              encoding: prefs.encoding
+          });
+          console.log("Highlights cleared");
+      }
+      
+      document.body.addEventListener('click', (event) => {
+          const target = event.target;
+          const isGenreButton = target.matches('#select');
+          const isNode = target.closest('.node');
+  
+          // If the click is outside of the genre button and the node, and not due to label click, clear highlights
+          if (!isGenreButton && !isNode && shouldClearHighlights) {
+              clearHighlights();
+          }
+  
+          // Reset the flag
+          shouldClearHighlights = true;
+      });
+  
+      window.addEventListener('dragover', function(e) {
+        e.preventDefault(); // Prevent default to allow dropping
+        console.log("DRAG_OVER_IFRAME");
+        window.parent.postMessage({ type: 'DRAG_OVER_IFRAME' }, frontend);
+      });
+  
+      // Detect a drop event
+      window.addEventListener('drop', function(e) {
+        e.preventDefault(); // Prevent default action (open as link for some elements)
+        const data = 'data or metadata about the dropped item';
+        window.parent.postMessage({ type: 'DROP_ON_IFRAME', data: data }, frontend);
+      });
+  
+      const isMobileDevice = /Mobi/i.test(window.navigator.userAgent);
+  
+      plot.tooltip_html = (datum) => {
+          return `
+            <div class='custom-tooltip'>
+              <h4>${datum[NAME_FIELD]}</h3>
+              <p>${datum.class}</p>
+            </div>
+          `;
+        };
+  
+  
+      /*document.getElementById('select').addEventListener('click', () => {
+          const ids = document.getElementById('tracks').value.split(' ').filter(d => d);
+          console.log({ ids });
+          const name = Math.random().toString(36);
+          plot.select_and_plot({ name, ids, idField: 'x' }); // Adjust 'class' to your ID field
+      });*/
+      
+      function search_zoom(x, y) {
+        plot._zoom.zoom_to(100, x, y);
+      }
+  
+      window.addEventListener('message', function(event) {
+        // Make sure to check the origin of the sender
+          if (event.origin !== frontend) {
+            console.log("Received message from unauthorized origin:", event.origin);
+            return;
+          }
+          if (event.data && event.data.type === 'searchZoom') {
+            const { x, y } = event.data;
+            search_zoom(x, y);
+          }
+        });
+        
+    } setupScatterPlot();
+  </script>

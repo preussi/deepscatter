@@ -2,18 +2,18 @@ import pandas as pd
 import numpy as np
 import json
 
-DATASET_NAME = 'musiccaps'
+with open('./config/config.json', 'r') as file:
+    config = json.load(file)
 
-with open('classes.json', 'r') as file:
-    class_data = json.load(file)
-classes = class_data['classes']
+DATASET_NAME = config['DATASET_NAME']
+classes = config['classes']
 
 def update_cls_columns(csv_file):
     # Read the CSV file into a DataFrame
     data = pd.read_csv(csv_file)
 
     # Extract class names from class_data
-    class_names = [cls['class'] for cls in class_data['classes']]
+    class_names = [cls['class'] for cls in classes]
     
     # Ensure binary columns for each class are present (initialize to 0)
     for cls_name in class_names:

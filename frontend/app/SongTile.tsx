@@ -1,25 +1,21 @@
 import React from 'react';
-import ProgressBar from './ProgressBar';
+import defaultSongIcon from '../assets/audio-wave-512.png';  // Adjust path as necessary
 
-const extractVideoID = (url) => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
-};
+const SongTile = ({ onClick, title, thumbnailUrl }) => {
+  const shouldAnimateTitle = title.length > 20;
+  if (title.length > 40) {
+    title = title.slice(0, 40) + '...';  // Truncate long titles
+  }
+  // Adding a separator with spaces and dashes between duplications
+  const repeatedTitle = shouldAnimateTitle ? `${title} ---  ${title}` : title;
 
-const SongTile = ({ title, artist, score, youtubeUrl }) => {
-  const thumbnailUrl = `https://img.youtube.com/vi/${extractVideoID(youtubeUrl)}/maxresdefault.jpg`;
-  const youtubeLink = `https://www.youtube.com/watch?v=${extractVideoID(youtubeUrl)}`;
-
-  // Determine whether title or artist should animate based on their length
-  const shouldAnimateTitle = title.length > 20; // Example condition
-  const shouldAnimateArtist = artist.length > 20; // Example condition
-
+  // Styles
   const tileStyle = {
-    width: '250px',
-    height: '250px',
-    backgroundImage: `url(${thumbnailUrl})`,
+    width: '200px',
+    height: '200px',
+    backgroundImage: `url(${thumbnailUrl || defaultSongIcon})`,
     backgroundSize: 'cover',
+    backgroundPosition: 'center',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -29,87 +25,47 @@ const SongTile = ({ title, artist, score, youtubeUrl }) => {
     position: 'relative',
     cursor: 'pointer',
     overflow: 'hidden',
-    backdropFilter: 'blur(5px)',
-    WebkitBackdropFilter: 'blur(5px)',
-  };
-  
-  const playButtonContainerStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '60px',
-    height: '60px',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white for the blur background
-    borderRadius: '50%', // Circular shape
-    position: 'absolute',
-    backdropFilter: 'blur(8px)', // Blurred background
-    WebkitBackdropFilter: 'blur(8px)', // For Safari
-  };
-
-  const playIconStyle = {
-    width: '60px', // Play icon size
-    height: '60px', // Play icon size
-    fill: 'black', // Icon color
-    border: '1px black solid', // White border around the icon
-    borderRadius: '50%', // Circular shape
+    backdropFilter: 'blur(50px)',
+    WebkitBackdropFilter: 'blur(50px)',
   };
 
   const textContainerStyle = {
-    background: 'rgba(255, 255, 255, 0.5)',
-    color: 'black',
-    padding: '5px',
-    textAlign: 'center',
+    padding: '10px',
+    textAlign: 'left',
     width: '100%',
-    position: 'absolute',
-    top: '30px',
-    left: '0',
-    backdropFilter: 'blur(5px)',
-    WebkitBackdropFilter: 'blur(5px)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
   };
 
-  const titleStyle = {
-    fontWeight: 'bold',
-    fontSize: '18px',
+  const textStyle = {
+    whiteSpace: 'nowrap',
+    display: 'inline-block',
+    willChange: 'transform',
+    animation: shouldAnimateTitle ? 'scrollText 14s linear infinite' : 'none',
+  };
+
+  const headerStyle = {
+    color: 'rgba(0, 0, 0, 0.8)',
+    fontSize: '13px',
+    fontWeight: 'light',
+    textAlign: 'left',
     margin: '0',
-    animation: shouldAnimateTitle ? 'scrollText 10s linear' : 'none',
-    animationIterationCount: shouldAnimateTitle ? '1' : 'none',
   };
 
-  const artistStyle = {
-    fontWeight: 'normal',
-    fontSize: '16px',
-    margin: '0',
-    color: 'rgba(0, 0, 0, 0.6)', // Lighter text for the artist
-    animation: shouldAnimateArtist ? 'scrollText 10s linear' : 'none',
-    animationIterationCount: shouldAnimateArtist ? '1' : 'none',
-  };
-
-  const progressBarContainerStyle = {
-    position: 'absolute',
-    bottom: '10px',
-    padding: '20px',
-    width: '100%',
-  };
+  const isMobileDevice = /Mobi/i.test(window.navigator.userAgent);
+  if (isMobileDevice) {
+    tileStyle.width = '130px';
+    tileStyle.height = '130px';
+  }
 
 
   return (
-    <a href={youtubeLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-      <div style={tileStyle}>
-        <div style={textContainerStyle}>
-          <div style={titleStyle}>{title}</div>
-          <div style={artistStyle}>{artist}</div>
-        </div>
-        {/* Play button with circular blur around it */}
-        <div style={playButtonContainerStyle}>
-          <svg style={playIconStyle} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </div>
-        <div style={progressBarContainerStyle}>
-          <ProgressBar score={score} />
-        </div>
+    <div onClick={onClick} style={tileStyle}>
+      <div style={textContainerStyle}>
+        <p style={headerStyle}>Track:</p>
+        <div style={textStyle}>{repeatedTitle}</div>  {/* Use the duplicated title with separator for the animation */}
       </div>
-    </a>
+    </div>
   );
 };
 

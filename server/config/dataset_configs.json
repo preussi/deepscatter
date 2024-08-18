@@ -1,0 +1,22 @@
+{
+    "disco": {
+        "model_checkpoint": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link"]
+    },
+    "yt8m": {
+        "model_checkpoint": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link", "start"]
+    },
+    "vctk": {
+        "model_checkpoint": "laion_clap/music_speech_audioset_epoch_15_esc_89.98.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link"]
+    },
+    "musiccaps": {
+        "model_checkpoint": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link", "start_s"]
+    },
+    "ESC50": {
+        "model_checkpoint": "laion_clap/music_audioset_epoch_15_esc_90.14.pt",
+        "output_fields": ["id", "x", "y", "class", "title", "link"]
+    }
+}
