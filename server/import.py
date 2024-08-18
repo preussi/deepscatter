@@ -17,7 +17,7 @@ DIMENSION = 512
 MILVUS_HOST = "milvus-standalone"
 MILVUS_PORT = "19530"
 
-DATASET = config['DATASET']
+DATASET_PATH = config['DATASET_PATH']
 DATASET_NAME = config['DATASET_NAME']
 EMBEDDING_FIELD = config['EMBEDDING_FIELD']
 LINK_FIELD = config['LINK_FIELD']
@@ -29,10 +29,10 @@ index_params = {"metric_type":"COSINE",
                 "params":{"nlist": 256}}
 
 # Load the dataset directly into the Dataset object
-if DATASET == 'ESC-50':
-    dataset = load_from_disk(DATASET)
+if DATASET_NAME == 'fma' or DATASET_NAME == 'jamendo':
+    dataset = load_from_disk(DATASET_PATH)
 else:
-    dataset = load_dataset(DATASET, split='train')
+    dataset = load_dataset(DATASET_PATH, split='train')
     print(dataset.features)
 
 if DATASET_NAME == 'vctk':
