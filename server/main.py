@@ -17,7 +17,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 search_params = {
@@ -31,10 +31,9 @@ json_file_path = './config/dataset_configs.json'
 with open(json_file_path, 'r') as file:
     dataset_configs = json.load(file)
 
-print(dataset_configs)
 connections.connect(
   alias="default",
-  host='standalone',
+  host='standalone', #172.22.0.7
   port='19530',
   db_name="default"
 )
@@ -51,6 +50,7 @@ class DatasetManager:
         model = CLAP_Module(enable_fusion=False, amodel='HTSAT-base')
         model.load_ckpt(checkpoint_path)
         return model
+        
 
     def search(self, input_embedding):
         output_fields = self.output_fields

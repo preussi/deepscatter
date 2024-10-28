@@ -1,6 +1,19 @@
-/server/music_speech_audioset_epoch_15_esc_89.98.pt
-<<<<<<< HEAD
+/server/laion_clap
+/server/.env
+/server/.venv
+/server/node_modules
+/server/audio_files
+
 /frontend/node_modules
 /frontend/.next
-=======
->>>>>>> parent of 40752f2 (fixed commits)
+
+mtg-jamendo-dataset
+fma_metadata
+fma_embeds
+CLAP-main
+Vectors
+volumes
+
+/embeds.py
+/merger.py
+git
