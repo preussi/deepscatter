@@ -1,3 +1,6 @@
 [submodule "deepscatter"]
 	path = deepscatter
 	url = https://github.com/nomic-ai/deepscatter
+[submodule "CLAP"]
+	path = CLAP
+	url = https://github.com/LAION-AI/CLAP
