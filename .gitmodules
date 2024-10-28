@@ -2,6 +2,6 @@
 	path = CLAP
 	url = https://github.com/LAION-AI/CLAP
 
-[submodule "audio_atlas"]
-path = audio_atlas
-url = https://github.com/preussi/deepscatter
+[submodule "deepscatter"]
+	path = deepscatter
+	url = https://github.com/preussi/deepscatter/tree/63f84173e01a69abefd33a039316c068f2a1e4e4
