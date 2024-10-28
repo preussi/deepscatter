@@ -1,0 +1,3 @@
+[submodule "deepscatter"]
+	path = deepscatter
+	url = https://github.com/nomic-ai/deepscatter
