@@ -1,6 +1,7 @@
 [submodule "CLAP"]
 	path = CLAP
 	url = https://github.com/LAION-AI/CLAP
+
 [submodule "audio_atlas"]
-	path = audio_atlas
-	url = https://github.com/preussi/deepscatter
+path = audio_atlas
+url = https://github.com/preussi/deepscatter
