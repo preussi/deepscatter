@@ -270,6 +270,7 @@ export default function Home() {
         const data = filterUniqueById(await response.json());
         setSearchInitiated(true);
         setUrls(data);
+        setAudioSource(generateAudioLink(data[0].link));
         setIsOverlayVisible(true);
 
         if (data && data.length > 0) {
